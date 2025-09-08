@@ -19,7 +19,7 @@ jobs:
 
       - name: Build & push API image
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}/api
+          IMAGE=ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')/api
           SHA=${{ github.sha }}
           docker build -t $IMAGE:$SHA ./api
           docker push $IMAGE:$SHA
