@@ -25,3 +25,14 @@ jobs:
           docker push $IMAGE:$SHA
           docker tag $IMAGE:$SHA $IMAGE:prod
           docker push $IMAGE:prod
+
+
+services:
+  api:
+    image: ghcr.io/nycounihan/bluecouch/api:prod
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports: ["8000:8000"]
+    restart: unless-stopped

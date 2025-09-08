@@ -1,0 +1,30 @@
+name: deploy-api
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-api.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update service on EC2 (SSH)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GHCR_USER,GHCR_PAT
+          script_stop: true
+          script: |
+            set -euo pipefail
+            [ -d ~/bluecouch ] || git clone https://github.com/NYCounihan/bluecouch.git ~/bluecouch
+            cd ~/bluecouch
+            git pull || true
+            echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            docker compose pull api
+            docker compose up -d api
+            docker image prune -f
