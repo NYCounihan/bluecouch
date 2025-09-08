@@ -21,10 +21,31 @@ jobs:
           script_stop: true
           script: |
             set -euo pipefail
+
+            # Defaults if envs not set
+            : "${GHCR_USER:=nycounihan}"
+
+            # First-time clone or update
             [ -d ~/bluecouch ] || git clone https://github.com/NYCounihan/bluecouch.git ~/bluecouch
             cd ~/bluecouch
             git pull || true
+
+            # GHCR login (requires GHCR_PAT with read:packages)
             echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-            docker compose pull api
-            docker compose up -d api
+
+            # Pick compose command (plugin or legacy binary)
+            if docker compose version >/dev/null 2>&1; then
+              DC="docker compose"
+            elif docker-compose version >/dev/null 2>&1; then
+              DC="docker-compose"
+            else
+              echo "Docker Compose not found. Install it on the instance, then rerun." >&2
+              exit 1
+            fi
+
+            # Pull & restart ONLY the API service
+            $DC pull api
+            $DC up -d api
+
+            # Optional cleanup
             docker image prune -f
