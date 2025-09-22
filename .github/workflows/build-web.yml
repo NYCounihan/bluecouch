@@ -9,6 +9,7 @@ on:
       - 'web/**'
       - 'docker-compose.yml'
       - '.github/workflows/build-web.yml'
+
 jobs:
   build:
     runs-on: ubuntu-latest

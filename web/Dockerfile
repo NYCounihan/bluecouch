@@ -2,9 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev || npm install --omit=dev
+RUN npm ci || npm install
 
-# using TSX in prod is fine for small admin; for stricter builds, add tsc
+# Copy source files and build TypeScript
 COPY . .
+RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --omit=dev
+
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

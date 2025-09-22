@@ -47,9 +47,8 @@ jobs:
               exit 1
             fi
 
-            # Pull & restart ONLY the Web service
-            $DC pull web
-            $DC up -d web
+            # Ensure all services are running (Web will pull from GHCR)
+            $DC up -d
 
             # Optional cleanup
             docker image prune -f
