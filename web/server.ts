@@ -1,5 +1,5 @@
 // web/server.ts
-import express from "express";
+import express, { Request, Response } from "express";
 import AdminJS from "adminjs";
 import * as AdminJSExpress from "@adminjs/express";
 import { Database, Resource } from "@adminjs/typeorm";
@@ -60,7 +60,7 @@ const router = AdminJSExpress.buildAuthenticatedRouter(
 app.use(admin.options.rootPath, router);
 
 // 5) Healthcheck
-app.get("/healthz", (_req, res) => res.json({ ok: true }));
+app.get("/healthz", (_req: Request, res: Response) => res.json({ ok: true }));
 
 // Initialize DataSource and start server
 dataSource.initialize().then(() => {
