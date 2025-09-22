@@ -23,6 +23,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: GHCR_USER,GHCR_PAT
           script_stop: true
+          debug: true
           script: |
             set -euo pipefail
 

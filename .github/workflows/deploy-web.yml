@@ -15,6 +15,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: echo "SSH connection successful"
+          
       - name: Update service on EC2 (SSH)
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -23,8 +31,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: GHCR_USER,GHCR_PAT
           script_stop: true
+          debug: true
           script: |
             set -euo pipefail
+
+            # Debug: Show environment info
+            echo "=== Debug Info ==="
+            echo "User: $(whoami)"
+            echo "Home: $HOME"
+            echo "PWD: $(pwd)"
+            echo "GitHub User: ${GHCR_USER:-not_set}"
+            echo "=================="
 
             # Defaults if envs not set
             : "${GHCR_USER:=nycounihan}"
@@ -47,8 +64,15 @@ jobs:
               exit 1
             fi
 
-            # Ensure all services are running (Web will pull from GHCR)
-            $DC up -d
+            # Check if web image exists before trying to start
+            echo "Checking if web image exists..."
+            if docker pull ghcr.io/nycounihan/bluecouch/web:prod; then
+              echo "Web image found, starting services..."
+              $DC up -d
+            else
+              echo "Web image not found, building from source..."
+              $DC up -d --build web
+            fi
 
             # Optional cleanup
             docker image prune -f
