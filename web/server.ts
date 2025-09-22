@@ -2,17 +2,24 @@
 import express from "express";
 import AdminJS from "adminjs";
 import * as AdminJSExpress from "@adminjs/express";
-import { Database, Resource } from "@adminjs/sql";
-import { Client } from "pg";
+import { Database, Resource } from "@adminjs/typeorm";
+import { DataSource } from "typeorm";
 
-// 1) Register the "sql" adapter so AdminJS can introspect tables
+// 1) Register the "typeorm" adapter so AdminJS can introspect tables
 AdminJS.registerAdapter({ Database, Resource });
 
 const app = express();
 
 // 2) Postgres connection (simple URI, internal host 'db')
 const pgUrl = process.env.DATABASE_URL_SIMPLE || "postgres://bluecouch:supersecurepassword@db:5432/bluecouch";
-const client = new Client({ connectionString: pgUrl });
+
+// Create TypeORM DataSource
+const dataSource = new DataSource({
+  type: "postgres",
+  url: pgUrl,
+  synchronize: false,
+  logging: false,
+});
 
 // Admin credential (very basic login for now)
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
@@ -20,16 +27,14 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change_me";
 
 // 3) Create the AdminJS instance pointing to your DB
 const admin = new AdminJS({
-  databases: [], // not used by sql adapter
+  databases: [dataSource], // TypeORM DataSource
   rootPath: "/admin",
   branding: {
     companyName: "Bluecouch Admin",
   },
   resources: [
-    // With @adminjs/sql, you can let it auto-discover tables
-    // or specify included tables explicitly:
-    { resource: { model: "items", client }, options: { navigation: "App" } },
-    // Add more tables as needed, e.g. users, orders, etc.
+    // TypeORM will auto-discover tables from the database
+    // You can also specify specific entities if needed
   ],
 });
 
@@ -57,6 +62,12 @@ app.use(admin.options.rootPath, router);
 // 5) Healthcheck
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
-app.listen(3000, () => {
-  console.log("Web (AdminJS) running at http://0.0.0.0:3000/admin");
+// Initialize DataSource and start server
+dataSource.initialize().then(() => {
+  app.listen(3000, () => {
+    console.log("Web (AdminJS) running at http://0.0.0.0:3000/admin");
+  });
+}).catch((error) => {
+  console.error("Error initializing database:", error);
+  process.exit(1);
 });

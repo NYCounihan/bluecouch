@@ -1,8 +1,12 @@
 FROM node:20-alpine
 
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+
+# Copy package files
+COPY package.json ./
+
+# Install dependencies (will create package-lock.json if it doesn't exist)
+RUN npm install
 
 # Copy source files and build TypeScript
 COPY . .

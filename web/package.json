@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "@adminjs/express": "^6.0.0",
-    "@adminjs/sql": "^1.6.0",
+    "@adminjs/typeorm": "^4.0.0",
     "adminjs": "^7.0.0",
     "express": "^4.19.2",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "tsx": "^4.16.0",
