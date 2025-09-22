@@ -15,14 +15,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: echo "SSH connection successful"
-          
       - name: Update service on EC2 (SSH)
         uses: appleboy/ssh-action@v1.2.0
         with:
