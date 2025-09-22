@@ -1,0 +1,21 @@
+{
+  "name": "bluecouch-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --enable-source-maps dist/server.js",
+    "dev": "tsx watch server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@adminjs/express": "^6.0.0",
+    "@adminjs/sql": "^1.6.0",
+    "adminjs": "^7.0.0",
+    "express": "^4.19.2",
+    "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.0",
+    "typescript": "^5.6.3"
+  }
+}

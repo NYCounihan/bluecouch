@@ -1,10 +1,10 @@
-# BlueCouch API
+# BlueCouch
 
-A minimal Python FastAPI application with PostgreSQL database, designed for containerized deployment on AWS EC2.
+A minimal Python FastAPI application with PostgreSQL database and Node.js admin interface, designed for containerized deployment on AWS EC2.
 
 ## Project Overview
 
-This project provides a simple CRUD API for managing items, with automated CI/CD pipeline that builds Docker images and deploys to EC2 via GitHub Container Registry (GHCR).
+This project provides a simple CRUD API for managing items with an admin interface for database management, featuring automated CI/CD pipeline that builds Docker images and deploys to EC2 via GitHub Container Registry (GHCR).
 
 ## File Structure
 
@@ -12,20 +12,30 @@ This project provides a simple CRUD API for managing items, with automated CI/CD
 bluecouch/
 ├── .env                     # Environment variables (local development)
 ├── .env.example            # Environment template (committed to repo)
-├── docker-compose.yml      # Multi-container orchestration
+├── docker-compose.yml      # Multi-container orchestration (production)
+├── docker-compose.local.yml # Local development orchestration
 ├── README.md               # This file
 ├── api/                    # FastAPI application
 │   ├── Dockerfile         # Python API container definition
 │   ├── main.py            # FastAPI application code
 │   └── requirements.txt   # Python dependencies
+├── web/                    # Node.js AdminJS interface
+│   ├── Dockerfile         # Node.js container definition
+│   ├── package.json       # Node.js dependencies
+│   ├── server.ts          # AdminJS server code
+│   └── tsconfig.json      # TypeScript configuration
 └── .github/
     └── workflows/
-        └── build-api.yml  # CI/CD pipeline configuration
+        ├── build-api.yml  # CI/CD pipeline for API
+        ├── build-web.yml  # CI/CD pipeline for Web
+        ├── deploy-api.yml # Deploy API to EC2
+        └── deploy-web.yml # Deploy Web to EC2
 ```
 
 ## Technology Stack
 
 - **Backend**: FastAPI (Python 3.11)
+- **Admin Interface**: Node.js + AdminJS (TypeScript)
 - **Database**: PostgreSQL 16
 - **ORM**: SQLAlchemy 2.0
 - **Containerization**: Docker + Docker Compose
@@ -34,10 +44,15 @@ bluecouch/
 
 ## API Endpoints
 
+### FastAPI (Python) - Port 8000
 - `GET /healthz` - Health check endpoint
 - `POST /items` - Create a new item
 - `GET /items/{item_id}` - Get specific item by ID
 - `GET /items` - List all items (with pagination)
+
+### AdminJS (Node.js) - Port 3000
+- `GET /admin` - Admin interface for database management
+- `GET /healthz` - Health check endpoint
 
 ## Local Development
 
@@ -68,9 +83,30 @@ bluecouch/
 4. **Verify deployment**
    ```bash
    curl http://localhost:8000/healthz
+   curl http://localhost:3000/healthz
    ```
 
-The API will be available at `http://localhost:8000` and PostgreSQL at `localhost:5432`.
+The API will be available at `http://localhost:8000`, AdminJS at `http://localhost:3000/admin`, and PostgreSQL at `localhost:5432`.
+
+## Admin Interface
+
+The Node.js service provides an AdminJS interface for database management:
+
+- **URL**: `http://localhost:3000/admin` (local) or `http://<EC2_IP>:3000/admin` (production)
+- **Login**: Use credentials from `.env` file (`ADMIN_EMAIL` / `ADMIN_PASSWORD`)
+- **Features**: 
+  - View and edit database tables
+  - Auto-discovery of PostgreSQL tables
+  - Basic authentication protection
+  - Clean, modern interface
+
+### Local Development with Build Context
+
+For local development, use the local compose file that builds from source:
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+```
 
 ## Deployment Workflow
 

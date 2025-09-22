@@ -1,14 +1,14 @@
-## Instructs GitHub Actions how to build the API Docker image.
-## Triggers when push changes to the `api/` folder, `docker-compose.yml`, or this workflow file.
-## Checks out the code, logs in to the GitHub Container Registry, builds the image from `api/Dockerfile`,
+## Instructs GitHub Actions how to build the Web Docker image.
+## Triggers when push changes to the `web/` folder, `docker-compose.yml`, or this workflow file.
+## Checks out the code, logs in to the GitHub Container Registry, builds the image from `web/Dockerfile`,
 ##  tags it with the commit SHA and `:prod`, and pushes both tags to GHCR.
-name: build-api
+name: build-web
 on:
   push:
     paths:
-      - 'api/**'
+      - 'web/**'
       - 'docker-compose.yml'
-      - '.github/workflows/build-api.yml'
+      - '.github/workflows/build-web.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,11 +21,11 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build & push API image
+      - name: Build & push Web image
         run: |
-          IMAGE=ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')/api
+          IMAGE=ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')/web
           SHA=${{ github.sha }}
-          docker build -t $IMAGE:$SHA ./api
+          docker build -t $IMAGE:$SHA ./web
           docker push $IMAGE:$SHA
           docker tag $IMAGE:$SHA $IMAGE:prod
           docker push $IMAGE:prod

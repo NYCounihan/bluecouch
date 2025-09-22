@@ -1,15 +1,15 @@
-## Instructs GitHub Actions how to deploy the latest API image to your EC2 server.
-## Trigged when push to the `main` branch and the changed files match the paths below.
+## Instructs GitHub Actions how to deploy the latest Web image to your EC2 server.
+## Triggered when push to the `main` branch and the changed files match the paths below.
 ##  SSHes into the EC2 instance, ensures the repo is present, logs in to GHCR,
-##  pulls the newest `:prod` image, and restarts only the API service via Docker Compose.
-name: deploy-api
+##  pulls the newest `:prod` image, and restarts only the Web service via Docker Compose.
+name: deploy-web
 on:
   push:
     branches: [ main ]
     paths:
-      - 'api/**'
+      - 'web/**'
       - 'docker-compose.yml'
-      - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/deploy-web.yml'
 
 jobs:
   deploy:
@@ -47,9 +47,9 @@ jobs:
               exit 1
             fi
 
-            # Pull & restart ONLY the API service
-            $DC pull api
-            $DC up -d api
+            # Pull & restart ONLY the Web service
+            $DC pull web
+            $DC up -d web
 
             # Optional cleanup
             docker image prune -f
